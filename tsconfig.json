@@ -1,0 +1,7 @@
+{
+  "extends": "@maas/config/tsconfig/package-base.json",
+  "compilerOptions": {
+    "lib": ["esnext", "dom"]
+  },
+  "exclude": ["node_modules", "dist"]
+}
