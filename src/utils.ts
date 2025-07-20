@@ -1,4 +1,5 @@
 import { matchesOperators } from './operators'
+import { isObject, isArray } from './guards'
 import type { ObjectFilter } from './types'
 
 // Pre-compiled field accessors cache
@@ -16,6 +17,8 @@ export function getValueByPath<T extends object>(
 
   // Fast path for simple property access (no dots)
   const dotIndex = path.indexOf('.')
+
+  // If no dot, direct access
   if (dotIndex === -1) {
     return (obj as Record<string, unknown>)[path]
   }
@@ -65,9 +68,8 @@ export function matchesFilter<T extends Record<string, unknown>>(
   obj: T,
   filter: ObjectFilter<T>
 ): boolean {
-  if (!obj || typeof obj !== 'object' || Array.isArray(obj)) return false
-  if (!filter || typeof filter !== 'object' || Array.isArray(filter))
-    return false
+  if (!isObject(obj)) return false
+  if (!isObject(filter)) return false
 
   // Quick check for empty filter
   let hasFields = false
@@ -86,7 +88,7 @@ export function matchesFilter<T extends Record<string, unknown>>(
   if (hasLogical) {
     if ('$and' in filter) {
       const andConditions = filter.$and
-      if (Array.isArray(andConditions)) {
+      if (isArray(andConditions)) {
         for (let i = 0; i < andConditions.length; i++) {
           if (!matchesFilter(obj, andConditions[i])) return false
         }
@@ -95,7 +97,7 @@ export function matchesFilter<T extends Record<string, unknown>>(
 
     if ('$or' in filter) {
       const orConditions = filter.$or
-      if (Array.isArray(orConditions)) {
+      if (isArray(orConditions)) {
         let matched = false
         for (let i = 0; i < orConditions.length; i++) {
           if (matchesFilter(obj, orConditions[i])) {
@@ -112,7 +114,7 @@ export function matchesFilter<T extends Record<string, unknown>>(
       if (
         notCondition &&
         typeof notCondition === 'object' &&
-        !Array.isArray(notCondition)
+        !isArray(notCondition)
       ) {
         if (matchesFilter(obj, notCondition)) return false
       }
@@ -120,7 +122,7 @@ export function matchesFilter<T extends Record<string, unknown>>(
 
     if ('$nor' in filter) {
       const norConditions = filter.$nor
-      if (Array.isArray(norConditions)) {
+      if (isArray(norConditions)) {
         for (let i = 0; i < norConditions.length; i++) {
           if (matchesFilter(obj, norConditions[i])) return false
         }
@@ -131,7 +133,6 @@ export function matchesFilter<T extends Record<string, unknown>>(
   // Handle field-level checks only if there are fields
   if (hasFields) {
     for (const key in filter) {
-      // Skip logical operators
       if (key === '$and' || key === '$or' || key === '$not' || key === '$nor')
         continue
 
@@ -144,7 +145,8 @@ export function matchesFilter<T extends Record<string, unknown>>(
   }
 
   return true
-} // Optimized value comparison
+}
+
 export function compareValues(a: unknown, b: unknown): number {
   if (a === b) return 0
   if (a == null) return b == null ? 0 : 1

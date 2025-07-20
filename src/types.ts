@@ -196,16 +196,5 @@ export type Collection<T> = {
 // ============================================================================
 // TYPE GUARD FUNCTIONS
 // ============================================================================
-/**
- * Check if value is a valid Date
- */
-export function isDate(value: unknown): value is Date {
-  return value instanceof Date && !isNaN(value.getTime())
-}
 
-/**
- * Check if value is a plain object (excluding arrays and null)
- */
-export function isObject(x: unknown): x is Record<string, unknown> {
-  return typeof x === 'object' && x !== null && !Array.isArray(x)
-}
+// Type guard functions have been moved to src/guards.ts for better modularity
