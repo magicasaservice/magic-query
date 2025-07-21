@@ -10,13 +10,13 @@ MongoDB-style querying for TypeScript arrays with deep object filtering, logical
 
 ## Features
 
-- 🔍 **MongoDB-Style Operators** - Familiar `$gt`, `$in`, `$and`, `$or`, etc.
-- 🌊 **Deep Object Querying** - Query nested objects with dot notation (`'profile.settings.email'`)
-- 🎯 **TypeScript First** - Type-safe queries with IntelliSense autocomplete
-- 🚀 **Zero Dependencies** - Lightweight library with no external dependencies
-- 📦 **Tree-Shakable** - Import only the functions you need
-- 🛡️ **Runtime Safety** - Gracefully handles undefined/null values and invalid paths
-- ⚡ **Performance Optimized** - Cached path resolution, optimized operators, and **one-time `RegExp` compilation** for `$regex` patterns
+- **MongoDB-Style Operators** Familiar `$gt`, `$in`, `$and`, `$or`, etc.
+- **Deep Object Querying** Query nested objects with dot notation (`'profile.settings.email'`)
+- **TypeScript First** Type-safe queries with IntelliSense autocomplete
+- **Zero Dependencies** Lightweight library with no external dependencies
+- **Tree-Shakable** Import only the functions you need
+- **Runtime Safety** Gracefully handles undefined/null values and invalid paths
+- **Performance Optimized** Cached path resolution, optimized operators, and **one-time `RegExp` compilation** for `$regex` patterns
 
 ## The Problem
 
@@ -59,7 +59,7 @@ Magic Query simplifies complex in-memory queries:
 
 Use Magic Query when readability, maintainability, and type safety matter for complex in-memory data operations.
 
-**✅ Perfect for:**
+** Perfect for:**
 
 - Frontend data filtering and search functionality
 - Processing API responses with complex structures
@@ -68,7 +68,7 @@ Use Magic Query when readability, maintainability, and type safety matter for co
 - Teams familiar with MongoDB/NoSQL query syntax
 - TypeScript projects requiring type safety
 
-**⚠️ Consider alternatives for:**
+** Consider alternatives for:**
 
 - Simple single-field filtering (native `.filter()` is sufficient)
 - Very large datasets >50k items (use server-side filtering)
@@ -183,7 +183,7 @@ interface ObjectQuery<T> {
 
 Magic Query offers flexible ways to combine conditions, giving you precise control over your filtering logic.
 
-### 🔗 AND Logic - All Conditions Must Match
+### AND Logic - All Conditions Must Match
 
 ```typescript
 // Array syntax (clean and concise)
@@ -208,7 +208,7 @@ const seniorAdmins = findMany(users, {
 })
 ```
 
-### 🔀 OR Logic - Any Condition Can Match
+### OR Logic - Any Condition Can Match
 
 ```typescript
 // Find privileged users (admins, moderators, or premium members)
@@ -224,7 +224,7 @@ const privilegedUsers = findMany(users, {
 // Result: Users who are admin OR moderator OR premium
 ```
 
-### 🚫 NOT Logic - Exclude Conditions
+### NOT Logic - Exclude Conditions
 
 ```typescript
 // Find all users except banned ones
@@ -245,7 +245,7 @@ const activeNonTestUsers = findMany(users, {
 })
 ```
 
-### 🔄 Complex Combinations
+### Complex Combinations
 
 ```typescript
 // Real-world example: Find users for a marketing campaign
@@ -677,16 +677,16 @@ const result5 = findMany(usersWithNulls, {
 
 ### Optimization Tips
 
-- **Use specific operators** - `$eq` is faster than `$regex` for exact matches
-- **Avoid very deep nesting** - Paths deeper than 5 levels may impact performance
-- **Consider pagination** - For datasets larger than 10,000 items, implement pagination
+- **Use specific operators** `$eq` is faster than `$regex` for exact matches
+- **Avoid very deep nesting** Paths deeper than 5 levels may impact performance
+- **Consider pagination** For datasets larger than 10,000 items, implement pagination
 
 ### Performance Features
 
-- **Path caching** - Dot notation paths are parsed once and cached
-- **Regex caching** - Regular expressions are compiled once and reused
-- **Set-based lookups** - Large `$in` arrays (>10 items) use Set for O(1) lookups
-- **Early termination** - `findFirst` stops at the first match
+- **Path caching** Dot notation paths are parsed once and cached
+- **Regex caching** Regular expressions are compiled once and reused
+- **Set-based lookups** Large `$in` arrays (>10 items) use Set for O(1) lookups
+- **Early termination** `findFirst` stops at the first match
 
 ```typescript
 // ✅ Good performance
@@ -720,10 +720,6 @@ const results = findMany(users, {
   orderBy: { name: 'asc' },
 })
 ```
-
-## Contributing
-
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
 
 ## License
 
