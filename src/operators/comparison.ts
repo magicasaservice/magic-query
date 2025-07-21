@@ -1,7 +1,3 @@
-/**
- * Comparison operator utilities for numbers and strings
- */
-
 import { isNumber, isString } from '../guards.js'
 
 /**

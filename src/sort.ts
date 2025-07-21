@@ -1,13 +1,7 @@
-/**
- * Sorting utilities for query operations
- */
-
 import { getValueByPath, compareValues } from './utils.js'
+import { isNullOrUndefined } from './guards.js'
 import type { SortDirection } from './types.js'
 
-/**
- * Apply sorting to an array of objects based on orderBy configuration
- */
 export function applySorting<T extends object>(
   items: T[],
   orderBy?:
@@ -19,20 +13,25 @@ export function applySorting<T extends object>(
   const orderEntries = Object.entries(orderBy)
   if (orderEntries.length === 0) return items
 
-  const [[orderField, direction]] = orderEntries
+  return items.slice().sort((a, b) => {
+    for (const [field, direction] of orderEntries) {
+      const aValue = getValueByPath(a, field)
+      const bValue = getValueByPath(b, field)
 
-  // Pre-calculate sort values for better performance
-  const sortableItems = items.map((item) => ({
-    item,
-    sortValue: getValueByPath(item, orderField),
-  }))
+      // Null values always come last
+      const aNullOrUndefined = isNullOrUndefined(aValue)
+      const bNullOrUndefined = isNullOrUndefined(bValue)
 
-  // Optimized sort
-  sortableItems.sort((a, b) => {
-    const comparison = compareValues(a.sortValue, b.sortValue)
-    return direction === 'desc' ? -comparison : comparison
+      if (aNullOrUndefined && bNullOrUndefined) continue
+      if (aNullOrUndefined) return 1
+      if (bNullOrUndefined) return -1
+
+      const comparison = compareValues(aValue, bValue)
+
+      if (comparison !== 0) {
+        return direction === 'desc' ? -comparison : comparison
+      }
+    }
+    return 0
   })
-
-  // Extract sorted items
-  return sortableItems.map((s) => s.item)
 }

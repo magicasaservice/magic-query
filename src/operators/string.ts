@@ -1,7 +1,3 @@
-/**
- * String-related operator utilities
- */
-
 import { getCachedRegex } from '../cache.js'
 
 /**
@@ -29,10 +25,6 @@ export function stringMatchesRegex(
   pattern: string,
   flags = ''
 ): boolean {
-  try {
-    const regex = getCachedRegex(pattern, flags)
-    return regex.test(str)
-  } catch {
-    return false
-  }
+  const regex = getCachedRegex(pattern, flags)
+  return regex.test(str)
 }

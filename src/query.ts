@@ -1,6 +1,6 @@
 import { matchesFilter, getValueByPath } from './utils'
 import { applySorting } from './sort'
-import { isArray } from './guards'
+import { isArray, isObject } from './guards'
 import type { ObjectQuery, Collection } from './types'
 
 /**
@@ -59,14 +59,17 @@ export function findMany<T extends object>(
   if (isArray(where)) {
     // Array of conditions (AND logic)
     result = filterArrayConditions(where)
-  } else if (typeof where === 'object' && where !== null) {
+  } else if (isObject(where)) {
     const keys = Object.keys(where)
     if (keys.length === 1) {
       const field = keys[0]
       const cond = (where as Record<string, unknown>)[field]
 
       // Single-field primitive equality optimization
-      if (!field.includes('.') && (cond === null || typeof cond !== 'object')) {
+      if (
+        !field.includes('.') &&
+        (cond === null || (!isObject(cond) && !isArray(cond)))
+      ) {
         result = []
         for (let i = 0; i < objects.length; i++) {
           const obj = objects[i] as Record<string, unknown>

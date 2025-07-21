@@ -1,9 +1,16 @@
-/**
- * Main operator evaluation logic using modular utilities
- */
-
-import { isObject, isNonEmptyArray, isString, isArray } from '../guards.js'
-import { arrayIncludes, arrayContainsAll } from './array.js'
+import {
+  isObject,
+  isString,
+  isArray,
+  isEmpty,
+  isEqual,
+  isNullOrUndefined,
+} from '../guards.js'
+import {
+  arrayIncludes,
+  arrayContainsAll,
+  arrayIncludesShallow,
+} from './array.js'
 import { stringContainsIgnoreCase, stringMatchesRegex } from './string.js'
 
 import {
@@ -22,6 +29,37 @@ import {
   isDateBetween,
 } from './date.js'
 
+function getNestedValue(obj: Record<string, unknown>, path: string): unknown {
+  if (!obj || !path) return undefined
+
+  // If no dot, direct access
+  if (path.indexOf('.') === -1) {
+    return obj[path]
+  }
+
+  const parts = path.split('.')
+  let current: unknown = obj
+  for (let i = 0; i < parts.length && current != null; i++) {
+    current = (current as Record<string, unknown>)[parts[i]]
+  }
+  return current
+}
+
+function matchesConditions(
+  obj: Record<string, unknown>,
+  conditions: Record<string, unknown>
+): boolean {
+  for (const key in conditions) {
+    const condition = conditions[key]
+    const value = getNestedValue(obj, key)
+
+    if (!matchesOperators(value, condition)) {
+      return false
+    }
+  }
+  return true
+}
+
 export function matchesOperators(value: unknown, operators: unknown): boolean {
   if (typeof operators !== 'object' || operators === null) {
     return value === operators
@@ -33,14 +71,13 @@ export function matchesOperators(value: unknown, operators: unknown): boolean {
     const condition = ops[operator]
 
     if (operator.charCodeAt(0) === 36) {
-      // Handle $ operators
       switch (operator) {
         case '$eq':
-          if (value !== condition) return false
+          if (!isEqual(value, condition)) return false
           break
 
         case '$ne':
-          if (value === condition) return false
+          if (isEqual(value, condition)) return false
           break
 
         case '$gte':
@@ -76,13 +113,23 @@ export function matchesOperators(value: unknown, operators: unknown): boolean {
           break
 
         case '$in': {
-          if (!isNonEmptyArray(condition)) return false
-          if (!arrayIncludes(condition, value)) return false
+          if (!isArray(condition)) return false
+          if (isEmpty(condition)) return false
+          if (isObject(value)) {
+            if (!arrayIncludes(condition, value)) return false
+          } else {
+            if (!arrayIncludesShallow(condition, value)) return false
+          }
           break
         }
         case '$nin': {
-          if (!isNonEmptyArray(condition)) return false
-          if (arrayIncludes(condition, value)) return false
+          if (!isArray(condition)) return false
+          if (isEmpty(condition)) return false
+          if (isObject(value)) {
+            if (arrayIncludes(condition, value)) return false
+          } else {
+            if (arrayIncludesShallow(condition, value)) return false
+          }
           break
         }
 
@@ -91,16 +138,23 @@ export function matchesOperators(value: unknown, operators: unknown): boolean {
             if (!stringContainsIgnoreCase(value, condition)) return false
           } else if (isArray(value)) {
             let found = false
-            for (let i = 0; i < value.length; i++) {
-              const item = value[i]
-              if (isString(item) && isString(condition)) {
-                if (stringContainsIgnoreCase(item, condition)) {
+            if (isString(condition)) {
+              for (let i = 0; i < value.length; i++) {
+                const item = value[i]
+                if (
+                  isString(item) &&
+                  stringContainsIgnoreCase(item, condition)
+                ) {
                   found = true
                   break
                 }
-              } else if (item === condition) {
-                found = true
-                break
+              }
+            }
+            if (!found) {
+              if (isObject(condition)) {
+                found = arrayIncludes(value, condition)
+              } else {
+                found = arrayIncludesShallow(value, condition)
               }
             }
             if (!found) return false
@@ -127,7 +181,7 @@ export function matchesOperators(value: unknown, operators: unknown): boolean {
 
         case '$exists': {
           if (typeof condition !== 'boolean') return false
-          const exists = value !== undefined && value !== null
+          const exists = !isNullOrUndefined(value)
           if (condition !== exists) return false
           break
         }
@@ -160,7 +214,11 @@ export function matchesOperators(value: unknown, operators: unknown): boolean {
 
         case '$regex':
           if (isString(value) && isString(condition)) {
-            if (!stringMatchesRegex(value, condition, 'i')) return false
+            try {
+              if (!stringMatchesRegex(value, condition, 'i')) return false
+            } catch (error) {
+              throw error
+            }
           } else {
             return false
           }
@@ -176,21 +234,18 @@ export function matchesOperators(value: unknown, operators: unknown): boolean {
           break
 
         case '$elemMatch': {
-          if (!isArray(value) || !isObject(condition)) {
-            return false
-          }
-          let found = false
+          if (!isArray(value)) return false
+          const elementCondition = condition as Record<string, unknown>
           for (let i = 0; i < value.length; i++) {
-            const item = value[i]
-            if (isObject(item)) {
-              if (matchesOperators(item, condition)) {
-                found = true
-                break
-              }
+            const element = value[i]
+            if (
+              isObject(element) &&
+              matchesConditions(element, elementCondition)
+            ) {
+              return true
             }
           }
-          if (!found) return false
-          break
+          return false
         }
 
         default:

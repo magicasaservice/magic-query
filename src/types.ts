@@ -50,8 +50,6 @@ export type StringOperators = {
   $regex?: string
   /** Field exists and is not null */
   $exists?: boolean
-  /** Type check */
-  $type?: 'string'
   /** String length equals */
   $size?: number
 }
@@ -75,7 +73,6 @@ export type NumberOperators = {
   /** Between range (inclusive) */
   $between?: [number, number] | { min: number; max: number }
   $exists?: boolean
-  $type?: 'number'
 }
 
 /**
@@ -90,14 +87,12 @@ export type DateOperators = {
   $lte?: Date
   $between?: [Date, Date] | { min: Date; max: Date }
   $exists?: boolean
-  $type?: 'object'
 }
 
 export type BooleanOperators = {
   $eq?: boolean
   $ne?: boolean
   $exists?: boolean
-  $type?: 'boolean'
 }
 
 /**
@@ -117,7 +112,6 @@ export type ArrayOperators<T> = {
   $exists?: boolean
   /** At least one array element matches the condition */
   $elemMatch?: T extends object ? ObjectFilter<T> : FieldOperators<T>
-  $type?: 'array'
 }
 
 export type FieldOperators<T> = T extends string

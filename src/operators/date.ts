@@ -1,7 +1,3 @@
-/**
- * Date-related operator utilities
- */
-
 import { isDate } from '../guards.js'
 
 /**
