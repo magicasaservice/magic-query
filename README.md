@@ -59,7 +59,7 @@ Magic Query simplifies complex in-memory queries:
 
 Use Magic Query when readability, maintainability, and type safety matter for complex in-memory data operations.
 
-** Perfect for:**
+**Perfect for:**
 
 - Frontend data filtering and search functionality
 - Processing API responses with complex structures
@@ -68,7 +68,7 @@ Use Magic Query when readability, maintainability, and type safety matter for co
 - Teams familiar with MongoDB/NoSQL query syntax
 - TypeScript projects requiring type safety
 
-** Consider alternatives for:**
+**Consider alternatives for:**
 
 - Simple single-field filtering (native `.filter()` is sufficient)
 - Very large datasets >50k items (use server-side filtering)
